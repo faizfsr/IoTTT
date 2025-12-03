@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tugas Aplikasi ESP32 MQTT</title>
+  <link rel="stylesheet" href="stylewebsite.css" />
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <a href="#" onclick="tampilkanMenu('home')"> Home</a>
+    <a href="#" onclick="tampilkanMenu('monitoring')"> Monitoring Paket</a>
+    <a href="#" onclick="tampilkanMenu('kontrol')"> Kontrol Lampu</a>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <span class="menu-icon" onclick="toggleSidebar()">☰</span>
+    <h1>MONITORING DAN KONTROL ESP32</h1>
+  </div>
+
+  <!-- Konten: Home -->
+  <div class="content home active">
+    <h2>TUGAS APLIKASI</h2>
+    <ul class="namaanggota">
+      <li>ANGGOTA KELOMPOK 3</li>
+      <li>1. Faiz Firdaus Ramadhansyah (1527423052)</li>
+      <li>2. Aditia Dwi Putra (1527423004)</li>
+      <li>3. Fahri Ferdiansyah (1527423010)</li>
+    </ul>
+    <p class="keterangan">
+      Website ini terdapat 2 menu di kiri atas yang mana pada website ini dapat digunakan untuk memonitoring paket yang telah sampai di rumah dengan
+      menggunakan sensor ir untuk mendeteksi paketnya dan mikrokontroler ESP32 untuk komunikasi
+      nya dengan menggunakan mqtt sebagai server yang disambung kan ke website ini sehingga dapat
+      menggunakan website ini dari mana saja, website ini juga terdapat kendali jarak jauh lampu garasi
+    </p>
+    
+    <br> 
+    </br>
+    <p>BLOK DIAGRAM</p>
+    <img src="gambar/Diagram Tanpa Judul.drawio (1).png" width="30%" height="30%" />
+    <br>
+    </br>
+    <br>
+  </br>
+    <p>Hasil Percobaan Prototipe</p>
+
+  <div class="hasilpercobaan">
+    <p> Hasil Percobaan Prototipe Monitoring Paket</p>
+    <video width="30%" height="30%" controls>
+      <source src="video/monitoringpaket.mp4" type="video/mp4">
+    </video>
+    <br>
+    </br>
+    <p>Hasil Percobaan Prototipe Kontrol Lampu</p>
+    <video width="30%" height="30%" controls>
+      <source src="video/kontrollampu.mp4" type="video/mp4">
+    </video>
+  </div>
+    
+
+
+    
+  </div>
+
+  <!-- Konten: Monitoring Paket -->
+  <div class="content monitoring">
+    <h2>MONITORING PAKET</h2>
+    <p>Status: <strong class="status">Menunggu data...</strong></p>
+  </div>
+
+  <!-- Konten: Kontrol Lampu -->
+  <div class="content kontrol">
+    <h2>KONTROL LAMPU GARASI</h2>
+    <button class="btnon" onclick="kirimPerintah('ON')"> Hidupkan Lampu</button>
+    <button class="btnoff" onclick="kirimPerintah('OFF')"> Matikan Lampu</button>
+  </div>
+
+  <!-- Script MQTT & Navigasi -->
+  <script>
+    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+
+    client.on("connect", function () {
+      console.log("Terhubung ke broker MQTT");
+      client.subscribe("esp32/paket", function (err) {
+        if (!err) {
+          console.log("Berhasil subscribe ke topik esp32/paket");
+        }
+      });
+    });
+
+    client.on("message", function (topic, message) {
+      const status = message.toString();
+      document.querySelector(".status").innerText = status;
+      console.log("Pesan diterima:", status);
+    });
+
+    client.on("error", function (error) {
+      console.error("Koneksi MQTT error:", error);
+    });
+
+    function kirimPerintah(perintah) {
+      client.publish("esp32/kontrol", perintah);
+      console.log("Perintah dikirim:", perintah);
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("active");
+    }
+
+    function tampilkanMenu(menu) {
+      const menus = document.querySelectorAll(".content");
+      menus.forEach(div => {
+        if(div.classList.contains(menu)){
+          div.classList.add("active");
+        } else {
+          div.classList.remove("active");
+        }
+      });
+      toggleSidebar(); // Tutup sidebar setelah klik
+    }
+  </script>
+</body>
+</html>
+
